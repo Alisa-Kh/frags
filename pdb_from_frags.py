@@ -1,5 +1,38 @@
 import re
 import glob
+import sys
+
+# Get filename as an argument to the script
+frags_file_path = sys.argv[1]
+
+# Read only needed values from frags_file and store them in frags_file_values
+values_sets = []
+with open(frags_file_path) as frags_file:
+    all_file_lines = frags_file.readlines()
+    j = 0 
+    for i in range(2, len(all_file_lines)):
+        if j%5 == 0:
+            first_line_in_set = all_file_lines[i]
+            last_line_in_set = all_file_lines[i+4]
+            # Get parameters from first line and last line and save them in values_sets
+            first_line_words = first_line_in_set.split(' ')
+            param1 = first_line_words[3]
+            param2 = first_line_words[3]
+            param3 = last_line_words[3]
+            
+            values_sets.append([param1,param2,param3])
+            
+         j += 1
+
+# Save all frags_file_values into a new text file (intermediate result)
+
+# For each set of values (or for all of them together) => give them as params to a new (separate?) script
+
+
+
+
+
+
 
 try:
     for filename in glob.glob('frags.500.*mers'):
