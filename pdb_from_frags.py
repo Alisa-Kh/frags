@@ -21,13 +21,12 @@ with open(frags_file_path) as frags_file:
                 break
 
     lines_in_block_num = second_blank_line - first_blank_line
-
 # Get parameters from first line and last line and save them in values_sets
     j = 0
     for i in range(2, len(all_file_lines)):
         if j % lines_in_block_num == 0:
             first_line_in_set = all_file_lines[i]
-            last_line_in_set = all_file_lines[i+4]
+            last_line_in_set = all_file_lines[i+(lines_in_block_num-2)]
 
             first_line_words = first_line_in_set.split()
             last_line_words = last_line_in_set.split()
@@ -38,10 +37,8 @@ with open(frags_file_path) as frags_file:
             parameters_sets.append([pdb, chain, start_res, end_res])
         j += 1
 
-
 for item in parameters_sets:
     for par in item:
         frags_parameters.write("%s " % par)
     frags_parameters.write("\n")
-
 frags_parameters.close()
