@@ -1,0 +1,28 @@
+import subprocess
+import os
+
+# Open the frags_parameters, extract and append parameters to different lists
+f = open('frags_parameters', 'r')
+list_of_lines = f.readlines()
+pdbs = []
+chains = []
+start_res = []
+end_res = []
+for line in list_of_lines:
+    pdbs.append(line.split()[0])
+    chains.append(line.split()[1])
+    start_res.append(line.split()[2])
+    end_res.append(line.split()[3])
+
+# Create a list with output names for excisePdb
+output_names = []
+for i in range(len(pdbs)):
+    output_names.append(pdbs[i]+'.'+start_res[i]+'.'+end_res[i]+'.pdb')
+print(output_names)
+
+# Fetch PDBs with prody, call excisePdb and then delete the pdb file
+for pdb, chain, start, end, outfile in zip(pdbs, chains, start_res, end_res, output_names):
+    subprocess.run(['/vol/ek/share/csbw/tools/env2017/bin/prody', 'fetch', pdb])
+    subprocess.run(['/vol/ek/Home/alisa/PycharmProjects/get_pdb_from_fragments_file/excisePdb_working.pl',
+                    pdb + '.pdb', chain, start, end, outfile])
+    os.remove('/vol/ek/Home/alisa/PycharmProjects/get_pdb_from_fragments_file/'+pdb+'.pdb')
