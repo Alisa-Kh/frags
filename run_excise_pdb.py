@@ -20,11 +20,6 @@ for line in list_of_lines:
     start_res.append(line.split()[2])
     end_res.append(line.split()[3])
 
-# Create a list with output names for excisePdb
-# output_names = []
-# for i in range(len(pdbs)):
-#     output_names.append(pdbs[i]+'.'+chains[i]+'.'+start_res[i]+'.'+end_res[i]+'.pdb')
-
 # Fetch PDBs with prody, call excisePdb and then delete the pdb file
 for pdb, chain, start, end in zip(pdbs, chains, start_res, end_res):
     outfile = pdb +'.'+chain +'.'+start +'.'+end+'.pdb'
