@@ -1,24 +1,22 @@
 import os
 import sys
 
-ROSETTA_DATABASE = '/vol/ek/share/rosetta/rosetta_src_2017.45.59812_bundle/main/database'
+ROSETTA_DIR = '/vol/ek/share/rosetta/'
+ROSETTA_VERSION = 'rosetta_src_2017.45.59812_bundle'
+ROSETTA_DATABASE = ROSETTA_DIR + ROSETTA_VERSION + '/main/database'
 
 # Commands
 
-PRODY = '/vol/ek/share/csbw/tools/env2017/bin/prody fetch %s'
-RENUMBERING = \
-    '/vol/ek/share/rosetta/rosetta_src_2017.45.59812_bundle/tools/protein_tools/scripts/pdb_renumber.py {} {}'
-EXCISE_PDB = '/vol/ek/share/rosetta/pdbUtil/excisePdb_v2.pl {} {} {} {} {}'
-FIXBB = '/vol/ek/share/rosetta/rosetta_src_2017.52.59948_bundle/main/source/bin/fixbb.linuxgccrelease' \
+PRODY = '/vol/ek/share/csbw/tools/env2017/bin/prody fetch %s'  # used to fetch PDB, but any other method can be used
+RENUMBERING = ROSETTA_DIR + ROSETTA_VERSION + '/tools/protein_tools/scripts/pdb_renumber.py {} {}'
+EXCISE_PDB = ROSETTA_DIR + '/pdbUtil/excisePdb_v2.pl {} {} {} {} {}'
+FIXBB = ROSETTA_DIR + ROSETTA_VERSION + '/main/source/bin/fixbb.linuxgccrelease' \
         ' -database %s -in:file:s %s -resfile resfile_tmp -ex1 -ex2 -use_input_sc' \
         ' -scorefile design_score.sc -ignore_zero_occupancy false >>design.log'
 
 # Get filename as an argument to the script
 parameters_file_path = sys.argv[1]
 original_seq = sys.argv[2]  # peptide_sequence
-
-
-"""Update PYTHONPATH to be /vol/ek/share/rosetta/rosetta_src_2017.45.59812_bundle/tools/protein_tools/"""
 
 # Read the original peptide sequence
 with open(original_seq, 'r') as s:
@@ -40,31 +38,27 @@ for frag in fragments:
     sequences.append(frag.split()[4])
 
 
-def delete_frag(fragment):
+def delete_frag(fragment):  # delete bad fragments
         os.remove(fragment)
         print("Wrong length fragment has been deleted")
 
-# Fetch PDBs with prody, call excisePdb and then delete the pdb file
+# Fetch PDBs (here done with prody), call excisePdb and then delete the pdb file
 for pdb, chain, start, end, sequence in zip(pdbs, chains, start_res, end_res, sequences):
     outfile = pdb + '.' + chain + '.' + start + '.' + end + '.pdb'
     pdb_full = pdb + '.pdb'
 
     os.system(PRODY % pdb)
-
     os.system(EXCISE_PDB.format(pdb_full, chain, start, end, outfile))
 
     if not os.path.exists(outfile):
         new_pdb = pdb_full
-
         print("renumbering:")
         os.system(RENUMBERING.format(pdb_full, new_pdb))  # Renumber PDB if it doesn't start from 1
 
         os.system(EXCISE_PDB.format(pdb_full, chain, start, end, outfile))
-
     os.remove(pdb_full)
 
 # check correctness of fragments
-
     with open(outfile) as frag:
         bad_pdb = False
         residues = set()
