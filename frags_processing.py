@@ -92,7 +92,6 @@ def fixbb_design(ori_seq, chain, start, sequence, outfile):
 def review_frags(outfile, start, end):
     # check correctness of fragments
     with open(outfile) as frag:
-        bad_pdb = False
         residues = set()
         cur_line = frag.readline().split()
         while cur_line[0] != 'ATOM':  # find ATOM lines
@@ -101,7 +100,7 @@ def review_frags(outfile, start, end):
             # if there is no atoms...
             if not cur_line:
                 delete_frag(outfile)
-                return
+                return False
 
         cur_line = frag.readline()
         while cur_line[22:27].strip() != start:
@@ -110,7 +109,7 @@ def review_frags(outfile, start, end):
             # if there is no start residue
             if not cur_line:
                 delete_frag(outfile)
-                return
+                return False
 
         cur_line = frag.readline()
         while cur_line[22:27].strip() != end:
@@ -120,18 +119,21 @@ def review_frags(outfile, start, end):
             # if there is no end residue
             if not cur_line:
                 delete_frag(outfile)
-                return
+                return False
 
         residues.add(cur_line[22:27])
     if len(residues) != (int(end) - int(start) + 1):
         delete_frag(outfile)
-        return
+        return False
 
-    
-def extract_fragments(original_seq):
+    else:
+        return True
+
+
+def extract_fragments(orig_seq):
 
     # Read the original peptide sequence
-    with open(original_seq, 'r') as s:
+    with open(orig_seq, 'r') as s:
         ori_seq = s.readline()
 
     # Open the frags_parameters, extract and append parameters to different lists
@@ -165,9 +167,10 @@ def extract_fragments(original_seq):
             os.system(EXCISE_PDB.format(pdb_full, chain, start, end, outfile))
         os.remove(pdb_full)
 
-        review_frags(outfile, start, end)
+        is_frag_ok = review_frags(outfile, start, end)
 
-        fixbb_design(ori_seq, chain, start, sequence, outfile)
+        if is_frag_ok:
+            fixbb_design(ori_seq, chain, start, sequence, outfile)
 
 
 if __name__ == "__main__":
