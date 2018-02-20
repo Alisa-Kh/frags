@@ -24,9 +24,11 @@ FRAG_PICKER = ROSETTA_DIR + ROSETTA_VERSION + '/main/source/bin/fragment_picker.
 
 
 def make_pick_fragments(pep_seq):
+    # if not os.path.exists('resfiles'):
+    #     os.makedirs('frag_picker')
     with open('xxxxx.fasta', 'w') as fasta_file:
         fasta_file.write('>|' + pep_seq + '\n' + pep_seq + '\n')
-        # fasta = fasta_file.read()
+
     os.system(MAKE_FRAGMENTS.format('xxxxx.fasta'))
     with open('psi_L1.cfg', 'w') as scores:
         scores.write('#score\tname\tpriority\twght\tmin_allowed\textras\n'
@@ -170,7 +172,11 @@ def extract_fragments(pep_sequence):
         pdb_full = pdb + '.pdb'
 
         os.system(PRODY % pdb)
-        os.system(EXCISE_PDB.format(pdb_full, chain, start, end, outfile))
+
+        if os.path.exists(pdb_full):
+            os.system(EXCISE_PDB.format(pdb_full, chain, start, end, outfile))
+        else:
+            continue  # if failed to fetch PDB
 
         if not os.path.exists(outfile):
             new_pdb = pdb_full
